@@ -26,7 +26,7 @@
     `;
     document.head.appendChild(initialStyle);
 
-    window.addEventListener('DOMContentLoaded', function () {
+    window.addEventListener('load', function () {
         // Function to determine if the site is already in dark mode
         function isDarkMode() {
             const bgColor = window.getComputedStyle(document.body).backgroundColor;
