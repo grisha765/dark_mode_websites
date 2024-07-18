@@ -20,7 +20,3 @@ Click the button below to download and install the script:
 2. Click the download button above to install the script.
 3. Enjoy browsing in dark mode!
 
-## License
-
-This project is licensed under the terms of the MIT license.
-
