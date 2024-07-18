@@ -7,8 +7,8 @@
 // @license      none
 // @match        *://*/*
 // @grant        none
-// @downloadURL  https://github.com/grisha765/dark-mode-script/blob/main/dark-mode.user.js
-// @updateURL    https://github.com/grisha765/dark-mode-script/blob/main/dark-mode.user.js
+// @downloadURL  https://github.com/grisha765/dark-mode-script/raw/main/dark-mode.user.js
+// @updateURL    https://github.com/grisha765/dark-mode-script/raw/main/dark-mode.user.js
 // ==/UserScript==
 
 (function () {

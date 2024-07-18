@@ -6,7 +6,7 @@ This user script enables dark mode on websites with a single line of CSS and che
 
 Click the button below to download and install the script:
 
-[Download Script](https://github.com/grisha765/dark-mode-script/blob/main/dark-mode.user.js)
+[Download Script](https://github.com/grisha765/dark-mode-script/raw/main/dark-mode.user.js)
 
 ## Features
 
