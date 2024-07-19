@@ -40,7 +40,31 @@
     const currentDomain = window.location.hostname;
     const domainEnabled = isDomainEnabled(currentDomain);
 
-    if (domainEnabled === null) {
+    if (domainEnabled) {
+        // Apply dark mode immediately for forced domains
+        const style = document.createElement('style');
+        style.textContent = `
+            html {
+                filter: invert(1) hue-rotate(180deg) contrast(0.8);
+            }
+
+            /** reverse filter for media elements */
+            img, video, picture, canvas, iframe, embed {
+                filter: invert(1) hue-rotate(180deg);
+            }
+
+            .dark-mode-settings, .dark-mode-settings * {
+                filter: none !important;
+                background-color: rgba(0, 0, 0, 0.8) !important;
+                color: #fff !important;
+            }
+
+            body {
+                visibility: visible;
+            }
+        `;
+        document.head.appendChild(style);
+    } else if (domainEnabled === null) {
         window.addEventListener('load', function () {
             // Function to determine if the site is already in dark mode
             function isDarkMode() {
@@ -87,30 +111,6 @@
             `;
             document.head.appendChild(style);
         });
-    } else if (domainEnabled) {
-        // Apply dark mode immediately for forced domains
-        const style = document.createElement('style');
-        style.textContent = `
-            html {
-                filter: invert(1) hue-rotate(180deg) contrast(0.8);
-            }
-
-            /** reverse filter for media elements */
-            img, video, picture, canvas, iframe, embed {
-                filter: invert(1) hue-rotate(180deg);
-            }
-
-            .dark-mode-settings, .dark-mode-settings * {
-                filter: none !important;
-                background-color: rgba(0, 0, 0, 0.8) !important;
-                color: #fff !important;
-            }
-
-            body {
-                visibility: visible;
-            }
-        `;
-        document.head.appendChild(style);
     }
 
     // Function to save settings to Tampermonkey storage
