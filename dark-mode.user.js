@@ -13,7 +13,7 @@
 // @grant        GM_deleteValue
 // @downloadURL  https://github.com/grisha765/dark_mode_websites/raw/main/dark-mode.user.js
 // @updateURL    https://github.com/grisha765/dark_mode_websites/raw/main/dark-mode.user.js
-
+// @run-at       document-start
 // ==/UserScript==
 
 (function () {
