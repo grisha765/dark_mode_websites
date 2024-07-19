@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Dark mode
 // @namespace    https://github.com/grisha765
-// @version      0.0.7
+// @version      0.0.8
 // @description  Enable dark mode with only one line of CSS, and check for built-in dark theme support
 // @author       Grisha Golyam
 // @license      none
@@ -64,68 +64,10 @@
         }
     }
 
-    // Apply initial dark theme as soon as possible if within time range
-    const currentDomain = window.location.hostname;
-    const domainEnabled = isDomainEnabled(currentDomain);
-
-    if (isWithinTimeRange()) {
-        if (domainEnabled) {
-            // Apply dark mode immediately for forced domains
-            requestAnimationFrame(requestAnimationFrameCallback);
-        } else if (domainEnabled === null) {
-            window.addEventListener('load', function () {
-                // Function to determine if the site is already in dark mode
-                function isDarkMode() {
-                    const bgColor = window.getComputedStyle(document.body).backgroundColor;
-                    const fgColor = window.getComputedStyle(document.body).color;
-                    if (!bgColor || !fgColor) return false;
-
-                    const rgb = bgColor.match(/\d+/g);
-                    const rgbText = fgColor.match(/\d+/g);
-                    if (!rgb || rgb.length < 3 || !rgbText || rgbText.length < 3) return false;
-
-                    const [r, g, b] = rgb.map(Number);
-                    const [rt, gt, bt] = rgbText.map(Number);
-                    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-                    const brightnessText = (rt * 299 + gt * 587 + bt * 114) / 1000;
-
-                    const backgroundIsDark = brightness < 128;
-                    const textIsLight = brightnessText > 128;
-
-                    return backgroundIsDark && textIsLight;
-                }
-
-                // If the site is already in dark mode, show the page and do nothing
-                if (isDarkMode()) {
-                    document.body.style.visibility = 'visible';
-                    return;
-                }
-
-                // Apply dark mode
-                const style = document.createElement('style');
-                style.textContent = `
-                    html {
-                        filter: invert(1) hue-rotate(180deg) contrast(0.8);
-                    }
-
-                    /** reverse filter for media elements */
-                    img, video, picture, canvas, iframe, embed {
-                        filter: invert(1) hue-rotate(180deg);
-                    }
-
-                    body {
-                        visibility: visible;
-                    }
-                `;
-                document.head.appendChild(style);
-            });
-        }
-    }
-
     // Function to add domain to settings
-    function addDomain(domain, enabled) {
+    function addDomain(domain, enabled, legacy) {
         const settings = loadSettings();
-        settings[domain] = enabled;
+        settings[domain] = { enabled, legacy };
         saveSettings(settings);
     }
 
@@ -142,6 +84,114 @@
         a.href = url;
         const host = a.hostname.split('.').slice(-2).join('.');
         return `*${host}*`;
+    }
+
+    // Function to determine if the site is already in dark mode
+    function isDarkMode() {
+        const bgColor = window.getComputedStyle(document.body).backgroundColor;
+        const fgColor = window.getComputedStyle(document.body).color;
+        if (!bgColor || !fgColor) return false;
+
+        const rgb = bgColor.match(/\d+/g);
+        const rgbText = fgColor.match(/\d+/g);
+        if (!rgb || rgb.length < 3 || !rgbText || rgbText.length < 3) return false;
+
+        const [r, g, b] = rgb.map(Number);
+        const [rt, gt, bt] = rgbText.map(Number);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        const brightnessText = (rt * 299 + gt * 587 + bt * 114) / 1000;
+
+        const backgroundIsDark = brightness < 128;
+        const textIsLight = brightnessText > 128;
+
+        return backgroundIsDark && textIsLight;
+    }
+
+    // Function for adding styles
+    function addStyles() {
+        const style = document.createElement('style');
+        style.textContent = `
+            html {
+                filter: invert(1) hue-rotate(180deg) contrast(0.8);
+            }
+
+            /** reverse filter for media elements */
+            img, video, picture, canvas, iframe, embed {
+                filter: invert(1) hue-rotate(180deg);
+            }
+
+            .dark-mode-settings, .dark-mode-settings * {
+                filter: none !important;
+                background-color: rgba(0, 0, 0, 0.8) !important;
+                color: #fff !important;
+            }
+
+            body {
+                visibility: visible;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    // Function to apply dark mode using requestAnimationFrame
+    function requestAnimationFrameCallback() {
+        if (document.head) {
+            addStyles();
+        } else {
+            requestAnimationFrame(requestAnimationFrameCallback);
+        }
+    }
+
+    // Function to apply dark mode using Legacy method
+    function applyLegacyDarkMode() {
+        window.addEventListener('load', function () {
+            if (isDarkMode()) {
+                document.body.style.visibility = 'visible';
+                return;
+            }
+            const style = document.createElement('style');
+            style.textContent = `
+                html {
+                    filter: invert(1) hue-rotate(180deg) contrast(0.8);
+                }
+
+                /** reverse filter for media elements */
+                img, video, picture, canvas, iframe, embed {
+                    filter: invert(1) hue-rotate(180deg);
+                }
+
+                body {
+                    visibility: visible;
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    }
+
+    // Apply initial dark theme as soon as possible if within time range
+    const currentDomain = window.location.hostname;
+    const domainSettings = isDomainEnabled(currentDomain);
+
+    if (isWithinTimeRange()) {
+        if (domainSettings) {
+            if (domainSettings.legacy) {
+                applyLegacyDarkMode();
+            } else {
+                requestAnimationFrame(requestAnimationFrameCallback);
+            }
+        } else if (domainSettings === null) {
+            // Check and apply dark mode for sites without their own dark theme
+            requestAnimationFrame(checkAndApplyDarkMode);
+        }
+    }
+
+    // Function to check and apply dark mode for sites without their own dark theme
+    function checkAndApplyDarkMode() {
+        if (isDarkMode()) {
+            document.body.style.visibility = 'visible';
+            return;
+        }
+        requestAnimationFrame(requestAnimationFrameCallback);
     }
 
     // Create settings UI
@@ -165,15 +215,26 @@
         domainInput.placeholder = 'Enter domain or pattern...';
         container.appendChild(domainInput);
 
+        const legacyCheckbox = document.createElement('input');
+        legacyCheckbox.type = 'checkbox';
+        legacyCheckbox.id = 'legacyMode';
+        const legacyLabel = document.createElement('label');
+        legacyLabel.htmlFor = 'legacyMode';
+        legacyLabel.textContent = 'Legacy Mode';
+        container.appendChild(legacyCheckbox);
+        container.appendChild(legacyLabel);
+
         const enableButton = document.createElement('button');
         enableButton.textContent = 'Enable';
         enableButton.onclick = () => {
             let domain = domainInput.value.trim();
+            const legacy = legacyCheckbox.checked;
             if (!domain) {
                 domain = getMainDomain(window.location.href);
             }
-            addDomain(domain, true);
+            addDomain(domain, true, legacy);
             domainInput.value = '';
+            legacyCheckbox.checked = false;
             updateDomainList();
         };
         container.appendChild(enableButton);
@@ -185,8 +246,9 @@
             if (!domain) {
                 domain = getMainDomain(window.location.href);
             }
-            addDomain(domain, false);
+            addDomain(domain, false, false);
             domainInput.value = '';
+            legacyCheckbox.checked = false;
             updateDomainList();
         };
         container.appendChild(disableButton);
@@ -227,7 +289,7 @@
             Object.keys(settings).forEach(domain => {
                 if (domain === 'timeRange') return;
                 const listItem = document.createElement('li');
-                listItem.textContent = `${domain} - ${settings[domain] ? 'Enabled' : 'Disabled'}`;
+                listItem.textContent = `${domain} - ${settings[domain].enabled ? 'Enabled' : 'Disabled'} ${settings[domain].legacy ? '(Legacy)' : ''}`;
                 const removeButton = document.createElement('button');
                 removeButton.textContent = 'Remove';
                 removeButton.onclick = () => {
@@ -266,8 +328,17 @@
         container.appendChild(closeButton);
     }
 
+    // Function to initialize the settings UI after DOM is ready
+    function initializeSettingsUI() {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', createSettingsUI);
+        } else {
+            createSettingsUI();
+        }
+    }
+
     // Register the menu command
-    GM_registerMenuCommand('Dark Mode Settings', createSettingsUI);
+    GM_registerMenuCommand('Dark Mode Settings', initializeSettingsUI);
 
     // Apply styles to exclude the settings UI from inversion
     GM_addStyle(`
@@ -278,39 +349,5 @@
         }
     `);
 
-    // Function for adding styles
-    function addStyles() {
-        const style = document.createElement('style');
-        style.textContent = `
-            html {
-                filter: invert(1) hue-rotate(180deg) contrast(0.8);
-            }
-
-            /** reverse filter for media elements */
-            img, video, picture, canvas, iframe, embed {
-                filter: invert(1) hue-rotate(180deg);
-            }
-
-            .dark-mode-settings, .dark-mode-settings * {
-                filter: none !important;
-                background-color: rgba(0, 0, 0, 0.8) !important;
-                color: #fff !important;
-            }
-
-            body {
-                visibility: visible;
-            }
-        `;
-        document.head.appendChild(style);
-    }
-
-    // Use requestAnimationFrame to add styles as early as possible
-    function requestAnimationFrameCallback() {
-        if (document.head) {
-            addStyles();
-        } else {
-            requestAnimationFrame(requestAnimationFrameCallback);
-        }
-    }
 }());
 
