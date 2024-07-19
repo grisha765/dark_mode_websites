@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Dark mode
 // @namespace    https://github.com/grisha765
-// @version      0.0.3
+// @version      0.0.4
 // @description  Enable dark mode with only one line of CSS, and check for built-in dark theme support
 // @author       Grisha Golyam
 // @license      none
@@ -55,6 +55,14 @@
         return null;
     }
 
+    // Function to extract the main domain
+    function getMainDomain(url) {
+        const a = document.createElement('a');
+        a.href = url;
+        const host = a.hostname.split('.').slice(-2).join('.');
+        return `*${host}*`;
+    }
+
     // Create settings UI
     function createSettingsUI() {
         const container = document.createElement('div');
@@ -79,24 +87,26 @@
         const enableButton = document.createElement('button');
         enableButton.textContent = 'Enable Dark Mode';
         enableButton.onclick = () => {
-            const domain = domainInput.value.trim();
-            if (domain) {
-                addDomain(domain, true);
-                domainInput.value = '';
-                updateDomainList();
+            let domain = domainInput.value.trim();
+            if (!domain) {
+                domain = getMainDomain(window.location.href);
             }
+            addDomain(domain, true);
+            domainInput.value = '';
+            updateDomainList();
         };
         container.appendChild(enableButton);
 
         const disableButton = document.createElement('button');
         disableButton.textContent = 'Disable Dark Mode';
         disableButton.onclick = () => {
-            const domain = domainInput.value.trim();
-            if (domain) {
-                addDomain(domain, false);
-                domainInput.value = '';
-                updateDomainList();
+            let domain = domainInput.value.trim();
+            if (!domain) {
+                domain = getMainDomain(window.location.href);
             }
+            addDomain(domain, false);
+            domainInput.value = '';
+            updateDomainList();
         };
         container.appendChild(disableButton);
 
