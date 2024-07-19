@@ -40,8 +40,8 @@
     const currentDomain = window.location.hostname;
     const domainEnabled = isDomainEnabled(currentDomain);
 
-    if (domainEnabled) {
-        // Apply dark mode immediately for forced domains
+    // Function for adding styles
+    function addStyles() {
         const style = document.createElement('style');
         style.textContent = `
             html {
@@ -64,6 +64,20 @@
             }
         `;
         document.head.appendChild(style);
+    }
+
+    // Use requestAnimationFrame to add styles as early as possible
+    function requestAnimationFrameCallback() {
+        if (document.head) {
+            addStyles();
+        } else {
+            requestAnimationFrame(requestAnimationFrameCallback);
+        }
+    }
+
+    if (domainEnabled) {
+        // Apply dark mode immediately for forced domains
+        requestAnimationFrame(requestAnimationFrameCallback);
     } else if (domainEnabled === null) {
         window.addEventListener('load', function () {
             // Function to determine if the site is already in dark mode
@@ -233,4 +247,5 @@
         }
     `);
 }());
+
 
