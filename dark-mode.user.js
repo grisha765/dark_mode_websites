@@ -57,7 +57,11 @@
         start.setHours(startHours, startMinutes, 0);
         end.setHours(endHours, endMinutes, 0);
 
-        return now >= start && now <= end;
+        if (start <= end) {
+            return now >= start && now <= end;
+        } else {
+            return now >= start || now <= end;
+        }
     }
 
     // Apply initial dark theme as soon as possible if within time range
