@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Dark mode
 // @namespace    https://github.com/grisha765
-// @version      0.0.4
+// @version      0.0.5
 // @description  Enable dark mode with only one line of CSS, and check for built-in dark theme support
 // @author       Grisha Golyam
 // @license      none
@@ -166,14 +166,22 @@
             // Function to determine if the site is already in dark mode
             function isDarkMode() {
                 const bgColor = window.getComputedStyle(document.body).backgroundColor;
-                if (!bgColor) return false;
+                const fgColor = window.getComputedStyle(document.body).color;
+                if (!bgColor || !fgColor) return false;
 
                 const rgb = bgColor.match(/\d+/g);
-                if (!rgb || rgb.length < 3) return false;
+                const rgbText = fgColor.match(/\d+/g);
+                if (!rgb || rgb.length < 3 || !rgbText || rgbText.length < 3) return false;
 
                 const [r, g, b] = rgb.map(Number);
+                const [rt, gt, bt] = rgbText.map(Number);
                 const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-                return brightness < 128;
+                const brightnessText = (rt * 299 + gt * 587 + bt * 114) / 1000;
+
+                const backgroundIsDark = brightness < 128;
+                const textIsLight = brightnessText > 128;
+
+                return backgroundIsDark && textIsLight;
             }
 
             // If the site is already in dark mode, show the page and do nothing
