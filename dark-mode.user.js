@@ -161,15 +161,6 @@
     const domainEnabled = isDomainEnabled(currentDomain);
 
     if (domainEnabled === null) {
-        const initialStyle = document.createElement('style');
-        initialStyle.textContent = `
-            html, body {
-                background-color: #111 !important;
-                color: #eee !important;
-                visibility: hidden;
-            }
-        `;
-        document.head.appendChild(initialStyle);
 
         window.addEventListener('load', function () {
             // Function to determine if the site is already in dark mode
@@ -184,9 +175,6 @@
                 const brightness = (r * 299 + g * 587 + b * 114) / 1000;
                 return brightness < 128;
             }
-
-            // Remove the initial dark theme
-            document.head.removeChild(initialStyle);
 
             // If the site is already in dark mode, show the page and do nothing
             if (isDarkMode()) {
