@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Dark mode
 // @namespace    https://github.com/grisha765
-// @version      0.0.8
+// @version      0.0.9
 // @description  Enable dark mode with only one line of CSS, and check for built-in dark theme support
 // @author       Grisha Golyam
 // @license      none
@@ -87,7 +87,9 @@
     }
 
     // Function to determine if the site is already in dark mode
-    function isDarkMode() {
+    function isDarkMode(domain) {
+        // Here we use the domain to get specific styles if necessary.
+        // For simplicity, we are using the same logic assuming the styles are global.
         const bgColor = window.getComputedStyle(document.body).backgroundColor;
         const fgColor = window.getComputedStyle(document.body).color;
         if (!bgColor || !fgColor) return false;
@@ -108,12 +110,14 @@
     }
 
     // Function to check and apply dark mode for sites without their own dark theme
-    function checkAndApplyDarkMode() {
-        if (isDarkMode()) {
+    function checkAndApplyDarkMode(domain) {
+        if (isDarkMode(domain)) {
+            console.log("isDarkMode for " + domain);
             document.body.style.visibility = 'visible';
             return;
         }
-        requestAnimationFrame(requestAnimationFrameCallback);
+        console.log("noDarkMode for " + domain);
+        requestAnimationFrame(() => requestAnimationFrameCallback(domain));
     }
 
     // Function for adding styles
@@ -182,15 +186,20 @@
     const domainSettings = isDomainEnabled(currentDomain);
 
     if (isWithinTimeRange()) {
-        if (domainSettings && domainSettings.enabled === null) {
-            // Check and apply dark mode for sites without their own dark theme
-            requestAnimationFrame(checkAndApplyDarkMode);
-        } else if (domainSettings && domainSettings.enabled) {
+        console.log(domainSettings);
+        if (domainSettings) {
             if (domainSettings.legacy) {
+                console.log("Settings: legacy");
                 applyLegacyDarkMode();
+            } else if (domainSettings.enabled) {
+                console.log("Settings: enable");
+                requestAnimationFrame(() => requestAnimationFrameCallback(currentDomain));
             } else {
-                requestAnimationFrame(requestAnimationFrameCallback);
+                console.log("Settings: disable");
             }
+        } else if (domainSettings === null) {
+            console.log("Settings: null");
+            requestAnimationFrame(() => checkAndApplyDarkMode(currentDomain));
         }
     }
 
