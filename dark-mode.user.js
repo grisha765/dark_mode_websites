@@ -182,7 +182,7 @@
     const domainSettings = isDomainEnabled(currentDomain);
 
     if (isWithinTimeRange()) {
-        if (domainSettings) {
+        if (domainSettings && domainSettings.enabled) {
             if (domainSettings.legacy) {
                 applyLegacyDarkMode();
             } else {
@@ -350,5 +350,4 @@
     `);
 
 }());
-
 
