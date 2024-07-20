@@ -182,15 +182,15 @@
     const domainSettings = isDomainEnabled(currentDomain);
 
     if (isWithinTimeRange()) {
-        if (domainSettings && domainSettings.enabled) {
+        if (domainSettings && domainSettings.enabled === null) {
+            // Check and apply dark mode for sites without their own dark theme
+            requestAnimationFrame(checkAndApplyDarkMode);
+        } else if (domainSettings && domainSettings.enabled) {
             if (domainSettings.legacy) {
                 applyLegacyDarkMode();
             } else {
                 requestAnimationFrame(requestAnimationFrameCallback);
             }
-        } else if (domainSettings === null) {
-            // Check and apply dark mode for sites without their own dark theme
-            requestAnimationFrame(checkAndApplyDarkMode);
         }
     }
 
