@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Dark mode
 // @namespace    https://github.com/grisha765
-// @version      0.0.9
+// @version      0.0.10
 // @description  Enable dark mode with only one line of CSS, and check for built-in dark theme support
 // @author       Grisha Golyam
 // @license      none
@@ -88,24 +88,38 @@
 
     // Function to determine if the site is already in dark mode
     function isDarkMode(domain) {
-        // Here we use the domain to get specific styles if necessary.
-        // For simplicity, we are using the same logic assuming the styles are global.
+        // Check for the presence of the 'dark' attribute in the HTML tag
+        if (document.documentElement.hasAttribute('dark')) {
+            return true;
+        }
+
+        // Get computed styles for background and foreground colors
         const bgColor = window.getComputedStyle(document.body).backgroundColor;
         const fgColor = window.getComputedStyle(document.body).color;
+
+        // Check if colors are retrieved correctly
         if (!bgColor || !fgColor) return false;
 
+        // Extract RGB values from the color strings
         const rgb = bgColor.match(/\d+/g);
         const rgbText = fgColor.match(/\d+/g);
+
+        // Ensure valid RGB values are extracted
         if (!rgb || rgb.length < 3 || !rgbText || rgbText.length < 3) return false;
 
+        // Convert RGB strings to numbers
         const [r, g, b] = rgb.map(Number);
         const [rt, gt, bt] = rgbText.map(Number);
+
+        // Calculate brightness of background and text colors
         const brightness = (r * 299 + g * 587 + b * 114) / 1000;
         const brightnessText = (rt * 299 + gt * 587 + bt * 114) / 1000;
 
+        // Determine if background is dark and text is light
         const backgroundIsDark = brightness < 128;
         const textIsLight = brightnessText > 128;
 
+        // Return true if both conditions are met
         return backgroundIsDark && textIsLight;
     }
 
