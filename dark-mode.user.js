@@ -107,6 +107,15 @@
         return backgroundIsDark && textIsLight;
     }
 
+    // Function to check and apply dark mode for sites without their own dark theme
+    function checkAndApplyDarkMode() {
+        if (isDarkMode()) {
+            document.body.style.visibility = 'visible';
+            return;
+        }
+        requestAnimationFrame(requestAnimationFrameCallback);
+    }
+
     // Function for adding styles
     function addStyles() {
         const style = document.createElement('style');
@@ -183,15 +192,6 @@
             // Check and apply dark mode for sites without their own dark theme
             requestAnimationFrame(checkAndApplyDarkMode);
         }
-    }
-
-    // Function to check and apply dark mode for sites without their own dark theme
-    function checkAndApplyDarkMode() {
-        if (isDarkMode()) {
-            document.body.style.visibility = 'visible';
-            return;
-        }
-        requestAnimationFrame(requestAnimationFrameCallback);
     }
 
     // Create settings UI
@@ -350,4 +350,5 @@
     `);
 
 }());
+
 
